@@ -109,4 +109,7 @@ car_news/
 - 🟢 **Працює стабільно та автоматично**
 - 📬 повідомлення надходять у **Telegram без ручного втручання**
 
+![Repo Size](https://img.shields.io/github/repo-size/vitalii-84/car_news)
+![Last Commit](https://img.shields.io/github/last-commit/vitalii-84/car_news)
+![Stars](https://img.shields.io/github/stars/vitalii-84/car_news?style=social)
 
