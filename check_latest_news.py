@@ -4,14 +4,24 @@ from bs4 import BeautifulSoup
 URL = "https://hyundai-kyiv.com.ua/specialoffers-bogdanauto"
 BASE_URL = "https://hyundai-kyiv.com.ua"
 
-response = requests.get(URL, timeout=20)
+headers = {
+    "User-Agent": (
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+        "AppleWebKit/537.36 (KHTML, like Gecko) "
+        "Chrome/120.0.0.0 Safari/537.36"
+    )
+}
+
+response = requests.get(
+    URL,
+    headers=headers,
+    timeout=30
+)
 response.raise_for_status()
 
 soup = BeautifulSoup(response.text, "html.parser")
 
-# знаходимо перший заголовок новини
 news_div = soup.find("div", class_="views-field views-field-title")
-
 if not news_div:
     raise RuntimeError("Не вдалося знайти новини на сторінці")
 
