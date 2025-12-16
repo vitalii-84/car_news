@@ -1,24 +1,61 @@
-name: Car News Checker Test
+name: Car News Checker
 
+# ===============================
+# Запуск два рази на день та вручну
+# ===============================
 on:
-  workflow_dispatch:  # Можна запускати вручну
+  schedule:
+    - cron: '0 9,14 * * *' # 11:00 та 16:00 за Києвом (UTC+2)
+  workflow_dispatch:       # ручний запуск
+
+# ===============================
+# Обмеження паралельних запусків
+# ===============================
+concurrency:
+  group: car-news-checker
+  cancel-in-progress: true
 
 jobs:
-  test:
+  check-news:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repo
+      # ===============================
+      # Клон репозиторію
+      # ===============================
+      - name: Checkout repository
         uses: actions/checkout@v4
 
+      # ===============================
+      # Налаштування Python
+      # ===============================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: "3.11"
+          python-version: '3.11'
 
+      # ===============================
+      # Встановлення залежностей
+      # ===============================
       - name: Install dependencies
         run: |
           pip install requests beautifulsoup4
 
-      - name: Run test script
+      # ===============================
+      # Запуск скрипта
+      # ===============================
+      - name: Run news checker
         run: python check_latest_news.py
+        env:
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # ===============================
+      # Завантаження last_post_id як артефакту
+      # ===============================
+      - name: Upload last_post_id
+        if: success() && exists('last_post_id.txt')
+        uses: actions/upload-artifact@v4
+        with:
+          name: last_post_id
+          path: last_post_id.txt
