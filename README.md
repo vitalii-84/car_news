@@ -1,4 +1,5 @@
 # 
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 
 ---
 # 🚗 Car News Telegram Bot (Bogdan Auto)
