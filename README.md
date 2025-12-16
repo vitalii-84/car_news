@@ -26,6 +26,7 @@ https://hyundai-kyiv.com.ua/node/7439
 - ⚙️ запускається автоматично за розкладом або вручну
 
 ---
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python)
 
 ## ⏰ Автоматизація
 
