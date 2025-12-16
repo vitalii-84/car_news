@@ -2,7 +2,6 @@ import requests
 from bs4 import BeautifulSoup
 
 URL = "https://hyundai-kyiv.com.ua/specialoffers-bogdanauto"
-BASE_URL = "https://hyundai-kyiv.com.ua"
 
 headers = {
     "User-Agent": (
@@ -13,27 +12,24 @@ headers = {
     "Accept-Language": "uk-UA,uk;q=0.9,en-US;q=0.8,en;q=0.7",
 }
 
-
-response = requests.get(
-    URL,
-    headers=headers,
-    timeout=30
-)
+response = requests.get(URL, headers=headers, timeout=30)
 response.raise_for_status()
 
 soup = BeautifulSoup(response.text, "html.parser")
 
-news_div = soup.find("div", class_="views-field views-field-title")
-if not news_div:
-    raise RuntimeError("Не вдалося знайти новини на сторінці")
+# Беремо ПЕРШУ новину
+first_news = soup.select_one(".views-field-title a")
 
-link = news_div.find("a")
-if not link:
-    raise RuntimeError("Не вдалося знайти посилання на новину")
+if not first_news:
+    raise RuntimeError("❌ Не вдалося знайти новини на сторінці")
 
-title = link.get_text(strip=True)
-relative_url = link.get("href")
-full_url = BASE_URL + relative_url
+title = first_news.get_text(strip=True)
+link = first_news["href"]
 
-print("Заголовок:", title)
-print("Посилання:", full_url)
+# Якщо лінк відносний — робимо абсолютний
+if link.startswith("/"):
+    link = "https://hyundai-kyiv.com.ua" + link
+
+print("✅ Знайдено останню спецпропозицію:")
+print(title)
+print(link)
