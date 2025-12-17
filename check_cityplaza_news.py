@@ -3,24 +3,6 @@ import requests
 from bs4 import BeautifulSoup
 
 # ===============================
-# Telegram
-# ===============================
-BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
-
-if not BOT_TOKEN or not CHAT_ID:
-    raise ValueError("Telegram credentials are not set")
-
-def send_telegram_message(message: str):
-    url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
-    payload = {
-        "chat_id": CHAT_ID,
-        "text": message
-    }
-    response = requests.post(url, data=payload, timeout=10)
-    response.raise_for_status()
-
-# ===============================
 # Site settings
 # ===============================
 URL = "https://cityplaza.toyota.ua/news"
@@ -41,12 +23,12 @@ soup = BeautifulSoup(response.text, "html.parser")
 
 first_news = soup.find("div", class_="news-item-info-")
 if not first_news:
-    print("❌ Не знайдено новини")
+    print("❌ Не знайдено жодної новини")
     exit(0)
 
 link_tag = first_news.find("a", class_="news-item-title-")
 if not link_tag or not link_tag.get("href"):
-    print("❌ Посилання відсутнє")
+    print("❌ Не знайдено посилання")
     exit(0)
 
 title = link_tag.text.strip()
@@ -63,12 +45,13 @@ if os.path.exists(LAST_POST_FILE):
         last_post_id = f.read().strip()
 
 if post_id == last_post_id:
-    print("ℹ️ Новин немає")
+    print("ℹ️ Новин немає, остання вже оброблена")
 else:
-    message = f"{title}\n{url}"
-    send_telegram_message(message)
+    print("🆕 Знайдена нова новина!")
+    print("TITLE:", title)
+    print("URL:", url)
 
     with open(LAST_POST_FILE, "w") as f:
         f.write(post_id)
 
-    print("✅ Надіслано в Telegram та збережено last_post_id")
+    print("✅ Збережено новий last_post_id")
