@@ -1,25 +1,35 @@
 import requests
 from bs4 import BeautifulSoup
 import os
+import warnings
 from telegram import Bot
 
 # ================== Налаштування ==================
-TELEGRAM_TOKEN = 'ВАШ_TELEGRAM_BOT_TOKEN'
-TELEGRAM_CHAT_ID = 'ВАШ_CHAT_ID'
 URL = 'https://toyota.com.ua/promos/'
-LAST_FILE = 'last_toyota_avtosamit.txt'
+LAST_FILE = 'last_post_id_toyota_avtosamit.txt'
+
+# Беремо токен і чат з environment variables
+TELEGRAM_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
+
+# Вимикаємо SSL warnings
+warnings.filterwarnings("ignore", message="Unverified HTTPS request")
+
 # ===================================================
 
-def send_telegram(message):
+def send_telegram(message: str):
+    """Надсилає повідомлення в Telegram."""
     bot = Bot(token=TELEGRAM_TOKEN)
     bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
 
 def get_latest_news():
+    """Повертає заголовок і посилання на останню новину."""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
     }
     r = requests.get(URL, headers=headers, verify=False)
     r.raise_for_status()
+    
     soup = BeautifulSoup(r.text, 'html.parser')
     
     # Перший блок новини
@@ -43,12 +53,14 @@ def get_latest_news():
     return title, href
 
 def read_last():
+    """Зчитує останній збережений заголовок новини."""
     if not os.path.exists(LAST_FILE):
         return ''
     with open(LAST_FILE, 'r', encoding='utf-8') as f:
         return f.read().strip()
 
-def write_last(text):
+def write_last(text: str):
+    """Записує останній заголовок новини у файл."""
     with open(LAST_FILE, 'w', encoding='utf-8') as f:
         f.write(text)
 
@@ -59,6 +71,7 @@ def main():
         return
     
     last = read_last()
+    
     if title != last:
         message = f"{title}\n{link}"
         send_telegram(message)
