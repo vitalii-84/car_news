@@ -41,7 +41,8 @@ jobs:
       # Встановлення залежностей
       # ===============================
       - name: Install dependencies
-        run: pip install -r car_news/requirements.txt
+        working-directory: ./car_news
+        run: pip install -r requirements.txt
 
       # ===============================
       # Відновлення кешу last_post_id
@@ -49,7 +50,7 @@ jobs:
       - name: Restore last_post_id cache
         uses: actions/cache@v4
         with:
-          path: car_news/last_post_id.txt
+          path: ./car_news/last_post_id.txt
           key: last-post-id-${{ runner.os }}
           restore-keys: |
             last-post-id-
@@ -58,7 +59,8 @@ jobs:
       # Запуск скрипта
       # ===============================
       - name: Run news checker
-        run: python car_news/check_latest_news.py
+        working-directory: ./car_news
+        run: python check_latest_news.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
@@ -69,5 +71,5 @@ jobs:
       - name: Save updated last_post_id to cache
         uses: actions/cache@v4
         with:
-          path: car_news/last_post_id.txt
+          path: ./car_news/last_post_id.txt
           key: last-post-id-${{ runner.os }}-${{ github.run_id }}
