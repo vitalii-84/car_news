@@ -1,7 +1,9 @@
+import os
 import requests
 from bs4 import BeautifulSoup
 
 URL = "https://cityplaza.toyota.ua/news"
+LAST_POST_FILE = "last_post_id_cityplaza.txt"
 
 headers = {
     "User-Agent": (
@@ -17,25 +19,37 @@ response.raise_for_status()
 html = response.text
 soup = BeautifulSoup(html, "html.parser")
 
-# 1️⃣ знаходимо перший контейнер новини
 first_news = soup.find("div", class_="news-item-info-")
-
 if not first_news:
     print("❌ Не знайдено жодної новини")
-    exit()
+    exit(0)
 
-# 2️⃣ знаходимо посилання
 link_tag = first_news.find("a", class_="news-item-title-")
-
 if not link_tag or not link_tag.get("href"):
     print("❌ Не знайдено посилання")
-    exit()
+    exit(0)
 
 title = link_tag.text.strip()
 relative_url = link_tag["href"]
 url = "https://cityplaza.toyota.ua" + relative_url
 post_id = relative_url.split("/")[-1]
 
-print("TITLE:", title)
-print("URL:", url)
-print("POST_ID:", post_id)
+# ===============================
+# Перевірка last_post_id
+# ===============================
+last_post_id = None
+if os.path.exists(LAST_POST_FILE):
+    with open(LAST_POST_FILE, "r") as f:
+        last_post_id = f.read().strip()
+
+if post_id == last_post_id:
+    print("ℹ️ Новин немає, остання вже оброблена")
+else:
+    print("🆕 Знайдена нова новина!")
+    print("TITLE:", title)
+    print("URL:", url)
+
+    with open(LAST_POST_FILE, "w") as f:
+        f.write(post_id)
+
+    print("✅ Збережено новий last_post_id")
