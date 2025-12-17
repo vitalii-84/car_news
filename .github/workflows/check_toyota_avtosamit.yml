@@ -1,4 +1,4 @@
-name: Toyota AVTOSAMIT News Checker
+name: Toyota Avtosamit News Checker
 
 # ===============================
 # Запуск за розкладом та вручну
@@ -54,7 +54,7 @@ jobs:
       # ===============================
       # Запуск парсера
       # ===============================
-      - name: Run Toyota AVTOSAMIT checker
+      - name: Run Toyota Avtosamit checker
         run: python check_toyota_avtosamit.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
