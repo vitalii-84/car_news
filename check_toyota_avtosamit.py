@@ -18,7 +18,7 @@ def get_latest_news():
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
     }
-    r = requests.get(URL, headers=headers)
+    r = requests.get(URL, headers=headers, verify=False)
     r.raise_for_status()
     soup = BeautifulSoup(r.text, 'html.parser')
     
