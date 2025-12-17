@@ -5,7 +5,7 @@ name: Car News Checker
 # ===============================
 on:
   schedule:
-    - cron: '30 9 * * *'   # 11:00 за Києвом (UTC+2)
+    - cron: '0 9 * * *'   # 11:00 за Києвом (UTC+2)
     - cron: '0 14 * * *'  # 16:00 за Києвом (UTC+2)
   workflow_dispatch:
 
