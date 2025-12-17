@@ -1,14 +1,12 @@
 name: Car News Checker
 
 # ===============================
-# Автоматичний запуск та ручний тригер
+# Запуск два рази на день та вручну
 # ===============================
 on:
   schedule:
-    - cron: '0 11 * * *'
-      timezone: 'Europe/Kiev'  # 11:00 Київ
-    - cron: '0 16 * * *'
-      timezone: 'Europe/Kiev'  # 16:00 Київ
+    - cron: '0 9 * * *'   # 11:00 за Києвом (UTC+2)
+    - cron: '0 14 * * *'  # 16:00 за Києвом (UTC+2)
   workflow_dispatch:
 
 # ===============================
@@ -41,34 +39,36 @@ jobs:
       # Встановлення залежностей
       # ===============================
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install requests beautifulsoup4
 
       # ===============================
-      # Відновлення кешу last_post_id
+      # Завантаження останнього last_post_id для порівняння
       # ===============================
+   
       - name: Restore last_post_id cache
         uses: actions/cache@v4
         with:
-          path: ./car_news/last_post_id.txt
-          key: last-post-id-${{ runner.os }}
-          restore-keys: |
-            last-post-id-
+          path: last_post_id.txt
+          key: last-post-id
+
 
       # ===============================
       # Запуск скрипта
       # ===============================
       - name: Run news checker
-        working-directory: ./car_news
         run: python check_latest_news.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
       # ===============================
-      # Оновлення кешу last_post_id
+      # Завантаження last_post_id як артефакту
       # ===============================
-      - name: Save updated last_post_id to cache
-        uses: actions/cache@v4
+      - name: Upload last_post_id
+        if: success()
+        uses: actions/upload-artifact@v4
         with:
-          path: ./car_news/last_post_id.txt
-          key: last-post-id-${{ runner.os }}-${{ github.run_id }}
+          name: last_post_id
+          path: last_post_id.txt
+        continue-on-error: true
