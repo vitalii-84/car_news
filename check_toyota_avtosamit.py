@@ -1,66 +1,65 @@
 import requests
 from bs4 import BeautifulSoup
 import os
-import warnings
-from telegram import Bot
 
 # ================== Налаштування ==================
+TELEGRAM_BOT_TOKEN = os.environ.get('TELEGRAM_BOT_TOKEN')
+TELEGRAM_CHAT_ID = os.environ.get('TELEGRAM_CHAT_ID')
 URL = 'https://toyota.com.ua/promos/'
-LAST_FILE = 'last_post_id_toyota_avtosamit.txt'
-
-# Беремо токен і чат з environment variables
-TELEGRAM_TOKEN = os.getenv('TELEGRAM_BOT_TOKEN')
-TELEGRAM_CHAT_ID = os.getenv('TELEGRAM_CHAT_ID')
-
-# Вимикаємо SSL warnings
-warnings.filterwarnings("ignore", message="Unverified HTTPS request")
-
+LAST_FILE = 'last_toyota_avtosamit.txt'
 # ===================================================
 
-def send_telegram(message: str):
-    """Надсилає повідомлення в Telegram."""
-    bot = Bot(token=TELEGRAM_TOKEN)
-    bot.send_message(chat_id=TELEGRAM_CHAT_ID, text=message)
+def send_telegram(message):
+    if not TELEGRAM_BOT_TOKEN or not TELEGRAM_CHAT_ID:
+        print("Telegram токен або chat_id не задані")
+        return
+    url = f'https://api.telegram.org/bot{TELEGRAM_BOT_TOKEN}/sendMessage'
+    data = {
+        'chat_id': TELEGRAM_CHAT_ID,
+        'text': message
+    }
+    try:
+        requests.post(url, data=data)
+    except Exception as e:
+        print("Помилка при відправці Telegram повідомлення:", e)
 
 def get_latest_news():
-    """Повертає заголовок і посилання на останню новину."""
     headers = {
         'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'
     }
-    r = requests.get(URL, headers=headers, verify=False)
-    r.raise_for_status()
-    
+    try:
+        r = requests.get(URL, headers=headers, verify=False)
+        r.raise_for_status()
+    except Exception as e:
+        print("Помилка при завантаженні сторінки:", e)
+        return None, None
+
     soup = BeautifulSoup(r.text, 'html.parser')
-    
-    # Перший блок новини
     first_news = soup.select_one('.news-grid-item-new')
     if not first_news:
         return None, None
-    
+
     title_tag = first_news.select_one('.news-grid-item__heading')
     link_tag = first_news.select_one('.btn-more')
-    
+
     if not title_tag or not link_tag:
         return None, None
-    
+
     title = title_tag.text.strip()
     href = link_tag.get('href').strip()
-    
-    # Додаємо домен, якщо посилання відносне
+
     if not href.startswith('http'):
         href = 'https://toyota.com.ua/' + href.lstrip('/')
-    
+
     return title, href
 
 def read_last():
-    """Зчитує останній збережений заголовок новини."""
     if not os.path.exists(LAST_FILE):
         return ''
     with open(LAST_FILE, 'r', encoding='utf-8') as f:
         return f.read().strip()
 
-def write_last(text: str):
-    """Записує останній заголовок новини у файл."""
+def write_last(text):
     with open(LAST_FILE, 'w', encoding='utf-8') as f:
         f.write(text)
 
@@ -69,9 +68,8 @@ def main():
     if not title or not link:
         print("Не вдалося знайти новини.")
         return
-    
+
     last = read_last()
-    
     if title != last:
         message = f"{title}\n{link}"
         send_telegram(message)
