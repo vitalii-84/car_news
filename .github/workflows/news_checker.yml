@@ -43,6 +43,16 @@ jobs:
           pip install requests beautifulsoup4
 
       # ===============================
+      # Завантаження останнього last_post_id для порівняння
+      # ===============================
+      - name: Download last_post_id
+        uses: actions/download-artifact@v4
+        with:
+          name: last_post_id
+          path: .
+        continue-on-error: true
+
+      # ===============================
       # Запуск скрипта
       # ===============================
       - name: Run news checker
