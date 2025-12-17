@@ -1,7 +1,14 @@
-# 
+# 🚗 Car News Telegram Bot (Bogdan Auto)
+
+![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
+![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-enabled-2088FF?logo=githubactions&logoColor=white)
+![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?logo=telegram&logoColor=white)
+![License](https://img.shields.io/badge/License-MIT-green)
+![Repo Size](https://img.shields.io/github/repo-size/vitalii-84/car_news)
+![Last Commit](https://img.shields.io/github/last-commit/vitalii-84/car_news)
+![Stars](https://img.shields.io/github/stars/vitalii-84/car_news?style=social)
 
 ---
-# 🚗 Car News Telegram Bot (Bogdan Auto)
 
 ### Автоматизований проєкт для **моніторингу нових спецпропозицій Bogdan Auto** з сайту Hyundai Kyiv з **автоматичними сповіщеннями в Telegram**.
 ### Проєкт працює *повністю без участі користувача* завдяки GitHub Actions.
