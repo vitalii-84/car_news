@@ -1,0 +1,33 @@
+name: Check Toyota Avtosamit
+
+on:
+  schedule:
+    # Перевірка двічі на день о 08:15 та 14:15 UTC (10:15 та 16:15 Київ)
+    - cron: '15 8 * * *'
+    - cron: '15 14 * * *'
+  workflow_dispatch:
+
+jobs:
+  check_news:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4 python-telegram-bot==20.3
+
+    - name: Run Toyota Avtosamit checker
+      env:
+        TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
+        TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+      run: |
+        python check_toyota_avtosamit.py
