@@ -5,7 +5,7 @@ name: Cityplaza News Checker
 # ===============================
 on:
   schedule:
-    - cron: '0 8 * * *'  # 10:00 за Києвом (UTC+2)
+    - cron: '0 8 * * *'   # 10:00 за Києвом (UTC+2)
     - cron: '0 14 * * *'  # 16:00 за Києвом (UTC+2)
   workflow_dispatch:
 
@@ -39,34 +39,34 @@ jobs:
       # Встановлення залежностей
       # ===============================
       - name: Install dependencies
-        run: pip install requests beautifulsoup4
+        run: pip install -r requirements.txt
 
       # ===============================
-      # Відновлення last_post_id з кешу
+      # Відновлення last_post_id з cache
       # ===============================
       - name: Restore last_post_id cache
         uses: actions/cache@v4
         with:
           path: last_post_id_cityplaza.txt
-          key: last-post-id-cityplaza
+          key: cityplaza-last-post-id
+          restore-keys: |
+            cityplaza-last-post-id
 
       # ===============================
-      # Запуск скрипта
+      # Гарантуємо існування state-файлу
+      # ===============================
+      - name: Ensure last_post_id file exists
+        run: |
+          if [ ! -f last_post_id_cityplaza.txt ]; then
+            echo "Creating empty last_post_id_cityplaza.txt"
+            touch last_post_id_cityplaza.txt
+          fi
+
+      # ===============================
+      # Запуск парсера
       # ===============================
       - name: Run Cityplaza news checker
         run: python check_cityplaza_news.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
-
-      # ===============================
-      # Збереження last_post_id в кеш
-      # ===============================
-      - name: Upload last_post_id
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: last-post-id-cityplaza
-          path: last_post_id_cityplaza.txt
-        continue-on-error: true
-
