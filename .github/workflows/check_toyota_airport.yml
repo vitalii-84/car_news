@@ -5,7 +5,7 @@ name: Toyota Airport News Checker
 # ===============================
 on:
   schedule:
-    - cron: '30 9 * * *'   # 11:30 за Києвом (UTC+2)
+    - cron: '30 8 * * *'   # 10:30 за Києвом (UTC+2)
     - cron: '30 14 * * *'  # 16:30 за Києвом (UTC+2)
   workflow_dispatch:
 
