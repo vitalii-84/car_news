@@ -62,8 +62,11 @@ jobs:
       # ===============================
       # Збереження last_post_id в кеш
       # ===============================
-      - name: Save last_post_id cache
-        uses: actions/cache@v4
+      - name: Upload last_post_id
+        if: success()
+        uses: actions/upload-artifact@v4
         with:
+          name: last-post-id-cityplaza
           path: last_post_id_cityplaza.txt
-          key: last-post-id-cityplaza
+        continue-on-error: true
+
