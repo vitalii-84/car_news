@@ -6,6 +6,9 @@ on:
     - cron: '0 14 * * *'  # 16:00 за Києвом
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 concurrency:
   group: cityplaza-news-checker
   cancel-in-progress: true
