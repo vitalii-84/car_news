@@ -42,23 +42,12 @@ jobs:
         run: pip install -r requirements.txt
 
       # ===============================
-      # Завантаження last_post_id з artifact
-      # (якщо артефакту немає, пропускаємо)
-      # ===============================
-      - name: Download last_post_id artifact
-        uses: actions/download-artifact@v4
-        with:
-          name: last-post-id-cityplaza
-          path: .
-
-      # ===============================
       # Гарантуємо існування state-файлу
       # ===============================
       - name: Ensure last_post_id file exists
         run: |
           if [ ! -f last_post_id_cityplaza.txt ]; then
             echo "" > last_post_id_cityplaza.txt
-          fi
 
       # ===============================
       # Запуск парсера
@@ -70,10 +59,12 @@ jobs:
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
       # ===============================
-      # Збереження нового last_post_id як artifact
+      # Коміт і пуш нового last_post_id (якщо змінився)
       # ===============================
-      - name: Upload last_post_id artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: last-post-id-cityplaza
-          path: last_post_id_cityplaza.txt
+      - name: Commit and push last_post_id if updated
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_post_id_cityplaza.txt
+          git diff --cached --quiet || git commit -m "Update last_post_id_cityplaza.txt"
+          git push origin HEAD:main
