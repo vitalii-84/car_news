@@ -42,15 +42,14 @@ jobs:
         run: pip install -r requirements.txt
 
       # ===============================
-      # Спроба завантажити last_post_id з artifact
-      # Якщо artifact ще не існує (перший запуск), не падаємо
+      # Завантаження last_post_id з artifact
+      # (якщо артефакту немає, пропускаємо)
       # ===============================
       - name: Download last_post_id artifact
         uses: actions/download-artifact@v4
         with:
           name: last-post-id-cityplaza
           path: .
-          if-no-files-found: ignore
 
       # ===============================
       # Гарантуємо існування state-файлу
@@ -72,11 +71,9 @@ jobs:
 
       # ===============================
       # Збереження нового last_post_id як artifact
-      # Далі наступні запуски зможуть його завантажувати
       # ===============================
       - name: Upload last_post_id artifact
         uses: actions/upload-artifact@v4
         with:
           name: last-post-id-cityplaza
           path: last_post_id_cityplaza.txt
-          if-no-files-found: ignore
