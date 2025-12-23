@@ -42,24 +42,22 @@ jobs:
         run: pip install -r requirements.txt
 
       # ===============================
-      # Відновлення last_post_id з cache
+      # Завантаження last_post_id з artifact
       # ===============================
-      - name: Restore last_post_id cache
-        uses: actions/cache@v4
+      - name: Download last_post_id artifact
+        uses: actions/download-artifact@v4
         with:
-          path: last_post_id_cityplaza.txt
-          key: cityplaza-last-post-id
-          restore-keys: |
-            cityplaza-last-post-id
+          name: last-post-id-cityplaza
+          path: ./   # завантажується в корінь репозиторію
+        continue-on-error: true
 
       # ===============================
-      # Гарантуємо існування state-файлу
+      # Створення файлу, якщо його нема
       # ===============================
       - name: Ensure last_post_id file exists
         run: |
           if [ ! -f last_post_id_cityplaza.txt ]; then
-            echo "Creating empty last_post_id_cityplaza.txt"
-            touch last_post_id_cityplaza.txt
+            echo "" > last_post_id_cityplaza.txt
           fi
 
       # ===============================
@@ -70,3 +68,12 @@ jobs:
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+
+      # ===============================
+      # Завантаження оновленого last_post_id як artifact
+      # ===============================
+      - name: Upload last_post_id artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: last-post-id-cityplaza
+          path: last_post_id_cityplaza.txt
