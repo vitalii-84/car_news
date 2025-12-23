@@ -8,13 +8,11 @@ from bs4 import BeautifulSoup
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-# Якщо немає токена або chat_id, Telegram буде вимкнено
 TELEGRAM_ENABLED = bool(BOT_TOKEN and CHAT_ID)
 
 def send_telegram_message(message: str):
-    """Відправка повідомлення в Telegram"""
+    """Відправляє повідомлення в Telegram, якщо токен і чат задані"""
     if not TELEGRAM_ENABLED:
-        print("⚠️ Telegram вимкнено. Повідомлення не буде відправлено.")
         return
 
     url = f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage"
@@ -48,54 +46,51 @@ HEADERS = {
 # ===============================
 # Завантаження сторінки
 # ===============================
-try:
-    response = requests.get(URL, headers=HEADERS, timeout=30)
-    response.raise_for_status()
-except requests.RequestException as e:
-    print("❌ Не вдалося завантажити сторінку:", e)
-    exit(1)
-
+response = requests.get(URL, headers=HEADERS, timeout=30)
+response.raise_for_status()
 soup = BeautifulSoup(response.text, "html.parser")
 
 # ===============================
-# Парсинг першої (найновішої) новини
+# Парсинг першої новини
 # ===============================
 first_news = soup.find("div", class_="news-item-info-")
 if not first_news:
-    print("❌ Не знайдено новини на сторінці")
+    print("❌ Не знайдено новини")
     exit(0)
 
 link_tag = first_news.find("a", class_="news-item-title-")
 if not link_tag or not link_tag.get("href"):
-    print("❌ Не знайдено посилання на новину")
+    print("❌ Не знайдено посилання")
     exit(0)
 
 title = link_tag.text.strip()
 relative_url = link_tag["href"]
 full_url = "https://cityplaza.toyota.ua" + relative_url
-post_id = relative_url.rstrip("/").split("/")[-1]
+post_id = relative_url.rstrip("/").split("/")[-1]  # Унікальний ідентифікатор новини
 
 # ===============================
-# Перевірка last_post_id
+# Створення файлу last_post_id, якщо його немає
 # ===============================
-# Створюємо файл, якщо його немає
 if not os.path.exists(LAST_POST_FILE):
     with open(LAST_POST_FILE, "w", encoding="utf-8") as f:
-        f.write("")  # порожній файл
+        f.write("")  # створюємо порожній файл
+    print(f"ℹ️ Створено файл {LAST_POST_FILE}")
 
-# Зчитування last_post_id з файлу
+# ===============================
+# Читання last_post_id з файлу
+# ===============================
 with open(LAST_POST_FILE, "r", encoding="utf-8") as f:
     last_post_id = f.read().strip()
 
 # ===============================
-# Логіка перевірки новизни
+# Порівняння останньої новини з останньою записаною
 # ===============================
 if post_id == last_post_id:
     print("ℹ️ Новин немає, остання вже оброблена")
-    exit(0)  # Немає нових новин, завершуємо виконання
+    exit(0)
 
 # ===============================
-# Знайдено нову новину
+# Нова новина
 # ===============================
 print("🆕 Знайдена нова новина!")
 print("TITLE:", title)
@@ -105,8 +100,8 @@ print("URL:", full_url)
 message = f"{title}\n{full_url}"
 send_telegram_message(message)
 
-# Збереження нового last_post_id у файл
+# Оновлення файлу last_post_id
 with open(LAST_POST_FILE, "w", encoding="utf-8") as f:
     f.write(post_id)
 
-print("✅ Збережено новий last_post_id:", post_id)
+print(f"✅ Збережено новий last_post_id: {post_id}")
