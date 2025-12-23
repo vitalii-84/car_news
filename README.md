@@ -2,6 +2,7 @@
 
 ![Python](https://img.shields.io/badge/Python-3.11-blue?logo=python&logoColor=white)
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-enabled-2088FF?logo=githubactions&logoColor=white)
+![Architecture](https://img.shields.io/badge/Architecture-One%20site%20→%20One%20parser-6f42c1)
 ![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
 ![Repo Size](https://img.shields.io/github/repo-size/vitalii-84/car_news)
@@ -128,8 +129,6 @@ car_news/
 
 ---
 
-
----
 
 ## 🧪 Архітектурний виняток: City Plaza Toyota
 
