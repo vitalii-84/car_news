@@ -4,7 +4,6 @@
 ![GitHub Actions](https://img.shields.io/badge/GitHub%20Actions-enabled-2088FF?logo=githubactions&logoColor=white)
 ![Architecture](https://img.shields.io/badge/Architecture-One%20site%20→%20One%20parser-6f42c1)
 ![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?logo=telegram&logoColor=white)
-![License](https://img.shields.io/badge/License-MIT-green)
 ![Design](https://img.shields.io/badge/Design-Decoupled%20parsers-6f42c1)
 ![CI](https://img.shields.io/badge/CI-GitHub%20Actions%20Cron-2088FF)
 ![State](https://img.shields.io/badge/State-File--based-success)
