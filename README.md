@@ -5,9 +5,10 @@
 ![Architecture](https://img.shields.io/badge/Architecture-One%20site%20→%20One%20parser-6f42c1)
 ![Telegram](https://img.shields.io/badge/Telegram-Bot-26A5E4?logo=telegram&logoColor=white)
 ![License](https://img.shields.io/badge/License-MIT-green)
-![Repo Size](https://img.shields.io/github/repo-size/vitalii-84/car_news)
-![Last Commit](https://img.shields.io/github/last-commit/vitalii-84/car_news)
-![Stars](https://img.shields.io/github/stars/vitalii-84/car_news?style=social)
+![Design](https://img.shields.io/badge/Design-Decoupled%20parsers-6f42c1)
+![CI](https://img.shields.io/badge/CI-GitHub%20Actions%20Cron-2088FF)
+![State](https://img.shields.io/badge/State-File--based-success)
+
 
 ---
 
