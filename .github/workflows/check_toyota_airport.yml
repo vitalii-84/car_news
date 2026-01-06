@@ -1,17 +1,14 @@
 name: Toyota Airport News Checker
 
-# ===============================
-# Запуск за розкладом та вручну
-# ===============================
 on:
   schedule:
-    - cron: '30 8 * * *'   # 10:30 за Києвом (UTC+2)
-    - cron: '30 14 * * *'  # 16:30 за Києвом (UTC+2)
+    - cron: '30 8 * * *'
+    - cron: '30 14 * * *'
   workflow_dispatch:
 
-# ===============================
-# Обмеження паралельних запусків
-# ===============================
+permissions:
+  contents: write
+
 concurrency:
   group: toyota-airport-checker
   cancel-in-progress: true
@@ -21,53 +18,29 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # ===============================
-      # Клон репозиторію
-      # ===============================
       - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          persist-credentials: true
 
-      # ===============================
-      # Налаштування Python
-      # ===============================
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: '3.11'
 
-      # ===============================
-      # Встановлення залежностей
-      # ===============================
       - name: Install dependencies
-        run: |
-          pip install requests beautifulsoup4
+        run: pip install requests beautifulsoup4
 
-      # ===============================
-      # Відновлення last_post_id з cache
-      # ===============================
-      - name: Restore last_post_id cache
-        uses: actions/cache@v4
-        with:
-          path: last_post_id_toyota_airport.txt
-          key: last-post-id-toyota-airport
-
-      # ===============================
-      # Запуск скрипта
-      # ===============================
       - name: Run Toyota Airport checker
         run: python check_toyota_airport.py
         env:
           TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
 
-      # ===============================
-      # Завантаження last_post_id як артефакту
-      # (для дебагу, не для логіки)
-      # ===============================
-      - name: Upload last_post_id
-        if: success()
-        uses: actions/upload-artifact@v4
-        with:
-          name: last_post_id_toyota_airport
-          path: last_post_id_toyota_airport.txt
-        continue-on-error: true
+      - name: Commit last_post_id if changed
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add last_post_id_toyota_airport.txt
+          git diff --cached --quiet || git commit -m "Update last_post_id_toyota_airport.txt"
+          git push
