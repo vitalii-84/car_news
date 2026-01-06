@@ -3,14 +3,12 @@ import requests
 from bs4 import BeautifulSoup
 from urllib.parse import urljoin
 
-
 # ===============================
-# Налаштування
+# Налаштування сайту
 # ===============================
 BASE_URL = "https://toyota-airport.com.ua"
 NEWS_URL = "https://toyota-airport.com.ua/ua/actions/"
-LAST_POST_ID_FILE = "last_post_id_toyota_airport.txt"
-
+LAST_POST_FILE = "last_post_id_toyota_airport.txt"
 
 # ===============================
 # Telegram
@@ -18,27 +16,31 @@ LAST_POST_ID_FILE = "last_post_id_toyota_airport.txt"
 BOT_TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = os.getenv("TELEGRAM_CHAT_ID")
 
-if not BOT_TOKEN or not CHAT_ID:
-    raise ValueError("Telegram credentials are not set")
+TELEGRAM_ENABLED = bool(BOT_TOKEN and CHAT_ID)
 
+def send_to_telegram(title: str, url: str):
+    """Надсилає повідомлення в Telegram"""
+    if not TELEGRAM_ENABLED:
+        return
+
+    message = (
+        "🆕 Нова акція Toyota Airport\n\n"
+        f"{title}\n{url}"
+    )
+
+    response = requests.post(
+        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
+        data={
+            "chat_id": CHAT_ID,
+            "text": message
+        },
+        timeout=20
+    )
+    response.raise_for_status()
+    print("✅ Повідомлення надіслано в Telegram")
 
 # ===============================
-# Робота з last_post_id
-# ===============================
-def load_last_post_id():
-    if not os.path.exists(LAST_POST_ID_FILE):
-        return None
-    with open(LAST_POST_ID_FILE, "r", encoding="utf-8") as f:
-        return f.read().strip()
-
-
-def save_last_post_id(post_id):
-    with open(LAST_POST_ID_FILE, "w", encoding="utf-8") as f:
-        f.write(post_id)
-
-
-# ===============================
-# Парсинг ВСІ АКЦІЇ (Toyota Airport)
+# Парсинг останньої акції
 # ===============================
 def fetch_latest_action():
     response = requests.get(NEWS_URL, timeout=20)
@@ -46,76 +48,58 @@ def fetch_latest_action():
 
     soup = BeautifulSoup(response.text, "html.parser")
 
-    # Вкладка "ВСІ АКЦІЇ"
     all_tab = soup.find("div", id="all")
     if not all_tab:
-        raise RuntimeError("Не знайдено вкладку ВСІ АКЦІЇ (id='all')")
+        raise RuntimeError("Не знайдено вкладку ВСІ АКЦІЇ")
 
-    # Перша (найновіша) акція
     first_action = all_tab.find("a", class_="actions__special__offers__box")
     if not first_action:
-        raise RuntimeError("Не знайдено жодної акції")
+        raise RuntimeError("Не знайдено акцій")
 
     title_el = first_action.find("p", class_="actions__special-title")
     if not title_el:
-        raise RuntimeError("Не знайдено заголовок акції")
+        raise RuntimeError("Не знайдено заголовок")
 
     title = title_el.get_text(strip=True)
     relative_url = first_action.get("href")
     full_url = urljoin(BASE_URL, relative_url)
 
-    post_id = relative_url.strip("/").split("/")[-1]
+    post_id = relative_url.rstrip("/").split("/")[-1]
 
-    return {
-        "title": title,
-        "url": full_url,
-        "post_id": post_id
-    }
-
-
-# ===============================
-# Надсилання в Telegram
-# ===============================
-def send_to_telegram(title, url):
-    message = (
-        "🆕 Нова акція Toyota Airport\n\n"
-        f"{title}\n"
-        f"{url}"
-    )
-
-    response = requests.post(
-        f"https://api.telegram.org/bot{BOT_TOKEN}/sendMessage",
-        data={
-            "chat_id": CHAT_ID,
-            "text": message,
-            "disable_web_page_preview": False
-        },
-        timeout=20
-    )
-    response.raise_for_status()
-
+    return title, full_url, post_id
 
 # ===============================
 # Основна логіка
 # ===============================
 def main():
-    latest = fetch_latest_action()
+    title, url, post_id = fetch_latest_action()
 
-    print(f"TITLE: {latest['title']}")
-    print(f"URL: {latest['url']}")
-    print(f"POST_ID: {latest['post_id']}")
+    print("TITLE:", title)
+    print("URL:", url)
+    print("POST_ID:", post_id)
 
-    last_post_id = load_last_post_id()
+    # Створюємо файл, якщо його немає
+    if not os.path.exists(LAST_POST_FILE):
+        with open(LAST_POST_FILE, "w", encoding="utf-8") as f:
+            f.write("")
+        print(f"ℹ️ Створено файл {LAST_POST_FILE}")
 
-    if latest["post_id"] == last_post_id:
-        print("ℹ️ Нових акцій немає, остання вже оброблена")
+    # Читаємо попередній post_id
+    with open(LAST_POST_FILE, "r", encoding="utf-8") as f:
+        last_post_id = f.read().strip()
+
+    if post_id == last_post_id:
+        print("ℹ️ Нових акцій немає")
         return
 
     print("🆕 Знайдена нова акція!")
-    send_to_telegram(latest["title"], latest["url"])
-    save_last_post_id(latest["post_id"])
-    print("✅ Збережено новий last_post_id")
+    send_to_telegram(title, url)
 
+    # Зберігаємо новий post_id
+    with open(LAST_POST_FILE, "w", encoding="utf-8") as f:
+        f.write(post_id)
+
+    print(f"✅ Збережено новий last_post_id: {post_id}")
 
 if __name__ == "__main__":
     main()
